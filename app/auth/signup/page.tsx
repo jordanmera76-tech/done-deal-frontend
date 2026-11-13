@@ -11,35 +11,36 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    const registeredUsers = JSON.parse(localStorage.getItem('registered_users') || '[]');
+    try {
+      const response = await fetch('https://done-deal-5o4f.onrender.com/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          email: email.trim().toLowerCase(),
+          password,
+        }),
+      });
 
-    const emailExists = registeredUsers.some(
-      (user: any) => user.email.toLowerCase() === email.trim().toLowerCase()
-    );
+      if (!response.ok) {
+        throw new Error('No se pudo registrar la cuenta. Intenta con otro correo.');
+      }
 
-    if (emailExists) {
-      setError('Este correo electrónico ya está registrado. Por favor, usa otro o inicia sesión.');
-      return;
+      const data = await response.json();
+
+      localStorage.setItem('current_user', JSON.stringify(data.user));
+
+      alert('¡Cuenta creada y guardada en MongoDB con éxito!');
+      router.push('/home');
+    } catch (err: any) {
+      setError(err.message || 'Error al conectar con el servidor.');
     }
-
-    const newUser = {
-      id: 'user_' + Date.now(),
-      name,
-      email: email.trim().toLowerCase(),
-      password,
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80'
-    };
-
-    registeredUsers.push(newUser);
-    localStorage.setItem('registered_users', JSON.stringify(registeredUsers));
-    localStorage.setItem('current_user', JSON.stringify(newUser));
-
-    alert('¡Cuenta creada con éxito!');
-    router.push('/home');
   };
 
   return (
