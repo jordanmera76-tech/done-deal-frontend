@@ -1,151 +1,247 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<'reviews' | 'account'>('account');
+  const [savedCount, setSavedCount] = useState(0);
+  const [cardsCount, setCardsCount] = useState(0);
+  const [myListingsCount, setMyListingsCount] = useState(0);
+
+  useEffect(() => {
+    const currentUser = JSON.parse(localStorage.getItem('current_user') || 'null');
+    setUser(currentUser);
+
+    const saved = JSON.parse(localStorage.getItem('saved_items') || '[]');
+    setSavedCount(saved.length);
+
+    const cards = JSON.parse(localStorage.getItem('payment_cards') || '[]');
+    setCardsCount(cards.length);
+
+    const localProds = JSON.parse(localStorage.getItem('local_products') || '[]');
+    setMyListingsCount(localProds.length > 0 ? localProds.length : 2);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('current_user');
+    setUser(null);
+    alert('Sesión cerrada con éxito.');
+  };
+
   return (
-    <div className="min-h-screen bg-[#121212] text-white pb-28 max-w-md mx-auto my-6 rounded-3xl overflow-hidden border border-gray-800 shadow-2xl relative font-sans">
+    <div className="min-h-screen bg-[#121212] text-white pb-28 font-sans">
       
-      {/* HEADER / VOLVER */}
-      <div className="px-6 pt-6 pb-2">
-        <Link href="/" className="text-emerald-400 text-sm inline-block font-medium hover:underline">
-          ← Volver al inicio
+      {/* 1. HEADER DE COMPUTADORA */}
+      <header className="hidden md:flex sticky top-0 z-50 bg-[#121212]/95 backdrop-blur-md border-b border-gray-800 px-8 py-4 items-center justify-between">
+        <Link href="/home" className="text-xl font-extrabold text-emerald-400 tracking-wider">
+          DONE DEAL
         </Link>
-      </div>
+        <div className="flex items-center gap-6 text-sm font-medium">
+          <Link href="/home" className="text-gray-300 hover:text-white transition">Home</Link>
+          <Link href="/messages" className="text-gray-300 hover:text-white transition">Messages</Link>
+          <Link href="/cart" className="text-gray-300 hover:text-white transition">Cart</Link>
+          <Link href="/profile" className="text-emerald-400 font-bold">Profile</Link>
+        </div>
+      </header>
 
-      {/* INFORMACIÓN DEL USUARIO */}
-      <div className="px-6 pt-2">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="relative">
-            <img 
-              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80" 
-              alt="Jordan Mera" 
-              className="w-16 h-16 rounded-2xl object-cover border-2 border-emerald-500 shadow-md"
-            />
-            <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-2 border-[#121212] rounded-full flex items-center justify-center text-[10px] text-black font-bold">✓</span>
+      {/* 2. CONTENIDO PRINCIPAL */}
+      {!user ? (
+        /* VISTA DE INVITADO / LOGIN REQUERIDO */
+        <div className="max-w-md mx-auto px-4 py-20 text-center space-y-6">
+          <div className="w-20 h-20 bg-emerald-500/15 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto text-3xl">
+            👤
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-white">Jordan Mera</h1>
-            <p className="text-[11px] text-gray-400">member since March 2025</p>
-            <div className="flex items-center gap-1 mt-1">
-              <span className="text-emerald-400 text-xs">★★★★★</span>
-              <span className="text-xs font-bold text-white">4.9</span>
-            </div>
+          <div className="space-y-2">
+            <h1 className="text-xl font-extrabold text-white">Inicia sesión en DoneDeal</h1>
+            <p className="text-xs text-gray-400">Accede a tu perfil, artículos guardados, métodos de pago y gestiona tus publicaciones.</p>
+          </div>
+          
+          <div className="flex gap-3 pt-2">
+            <Link href="/auth/signin" className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-black py-3.5 rounded-2xl font-extrabold text-xs transition shadow-lg flex items-center justify-center">
+              Iniciar Sesión
+            </Link>
+            <Link href="/auth/signup" className="flex-1 bg-[#1E1E1E] hover:bg-gray-800 border border-gray-800 text-white py-3.5 rounded-2xl font-bold text-xs transition flex items-center justify-center">
+              Registrarse
+            </Link>
           </div>
         </div>
-
-        {/* ESTADÍSTICAS (4 COLUMNAS) */}
-        <div className="grid grid-cols-4 gap-2 bg-[#1E1E1E] border border-gray-800 rounded-2xl p-3 text-center mb-6 shadow-lg">
-          <div>
-            <p className="text-sm font-bold text-white">3</p>
-            <p className="text-[10px] text-gray-400">Listings</p>
-          </div>
-          <div className="border-l border-gray-800">
-            <p className="text-sm font-bold text-white">12</p>
-            <p className="text-[10px] text-gray-400">Sold</p>
-          </div>
-          <div className="border-l border-gray-800">
-            <p className="text-sm font-bold text-white">15</p>
-            <p className="text-[10px] text-gray-400">Reviews</p>
-          </div>
-          <div className="border-l border-gray-800">
-            <p className="text-sm font-bold text-white">4.9</p>
-            <p className="text-[10px] text-gray-400">Rating</p>
-          </div>
-        </div>
-
-        {/* PESTAÑAS (Reviews / Account) */}
-        <div className="flex bg-[#1E1E1E] p-1 rounded-2xl border border-gray-800 mb-6">
-          <button className="flex-1 py-2 bg-emerald-500 text-black font-bold text-xs rounded-xl shadow-md transition">
-            Reviews
-          </button>
-          <button className="flex-1 py-2 text-gray-400 font-medium text-xs rounded-xl hover:text-white transition">
-            Account
-          </button>
-        </div>
-
-        {/* TARJETA DE RESUMEN DE CALIFICACIONES */}
-        <div className="bg-[#1E1E1E] border border-gray-800 rounded-2xl p-4 mb-6 shadow-lg">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <span className="text-3xl font-extrabold text-white">4.9</span>
-              <div className="text-emerald-400 text-xs mt-0.5">★★★★★</div>
-              <p className="text-[10px] text-gray-400 mt-0.5">15 reviews</p>
-            </div>
-            <div className="space-y-1.5 text-[11px] text-gray-400 w-36">
-              <div className="flex items-center gap-2">
-                <span>5★</span>
-                <div className="flex-1 h-1.5 bg-gray-800 rounded-full overflow-hidden">
-                  <div className="w-[90%] h-full bg-emerald-500 rounded-full"></div>
+      ) : (
+        /* VISTA CON SESIÓN ACTIVA */
+        <>
+          <div className="bg-gradient-to-b from-[#1a3a2a] via-[#121212] to-[#121212] px-6 pt-8 pb-6 border-b border-gray-900">
+            <div className="max-w-md mx-auto space-y-4">
+              
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <img 
+                    src={user?.avatar || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80'} 
+                    alt="Profile" 
+                    className="w-20 h-20 rounded-2xl object-cover border-2 border-emerald-500 shadow-xl"
+                  />
+                  <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 text-black text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-[#121212]">
+                    ✓
+                  </span>
                 </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span>4★</span>
-                <div className="flex-1 h-1.5 bg-gray-800 rounded-full overflow-hidden">
-                  <div className="w-[15%] h-full bg-emerald-500 rounded-full"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* LISTA DE RESEÑAS DE COMPRADORES */}
-        <div className="space-y-3 mb-6">
-          <div className="bg-[#1E1E1E] border border-gray-800 p-4 rounded-2xl shadow-md">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80" alt="Carlos M." className="w-8 h-8 rounded-full object-cover" />
                 <div>
-                  <h4 className="text-xs font-bold text-white">Carlos M.</h4>
-                  <div className="text-[10px] text-emerald-400">★★★★★</div>
+                  <h1 className="text-xl font-extrabold text-white">{user?.name}</h1>
+                  <p className="text-[11px] text-gray-400 mt-0.5">member since March 2021</p>
+                  <div className="flex items-center gap-1 mt-1 text-emerald-400 text-xs">
+                    <span>★★★★★</span>
+                    <span className="font-bold text-white text-xs ml-1">4.8</span>
+                  </div>
                 </div>
               </div>
-              <span className="text-[10px] text-gray-500">Jul 2026</span>
-            </div>
-            <p className="text-xs text-gray-300">Excelente vendedor! El producto estaba exactamente como se describía. Súper recomendado.</p>
-          </div>
 
-          <div className="bg-[#1E1E1E] border border-gray-800 p-4 rounded-2xl shadow-md">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80" alt="Sofía R." className="w-8 h-8 rounded-full object-cover" />
-                <div>
-                  <h4 className="text-xs font-bold text-white">Sofía R.</h4>
-                  <div className="text-[10px] text-emerald-400">★★★★★</div>
+              {/* ESTADÍSTICAS */}
+              <div className="grid grid-cols-4 gap-2 pt-2">
+                <div className="bg-[#1E1E1E]/80 backdrop-blur border border-gray-800 rounded-2xl p-3 text-center shadow-lg">
+                  <span className="block text-base font-black text-white">{myListingsCount}</span>
+                  <span className="block text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">Listings</span>
+                </div>
+                <div className="bg-[#1E1E1E]/80 backdrop-blur border border-gray-800 rounded-2xl p-3 text-center shadow-lg">
+                  <span className="block text-base font-black text-white">23</span>
+                  <span className="block text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">Sold</span>
+                </div>
+                <div className="bg-[#1E1E1E]/80 backdrop-blur border border-gray-800 rounded-2xl p-3 text-center shadow-lg">
+                  <span className="block text-base font-black text-white">23</span>
+                  <span className="block text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">Reviews</span>
+                </div>
+                <div className="bg-[#1E1E1E]/80 backdrop-blur border border-gray-800 rounded-2xl p-3 text-center shadow-lg">
+                  <span className="block text-base font-black text-emerald-400">4.8</span>
+                  <span className="block text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">Rating</span>
                 </div>
               </div>
-              <span className="text-[10px] text-gray-500">Jun 2026</span>
+
+              {/* PESTAÑAS (REVIEWS / ACCOUNT) */}
+              <div className="bg-[#1E1E1E] border border-gray-800 p-1.5 rounded-2xl grid grid-cols-2 gap-1 shadow-inner mt-4">
+                <button 
+                  onClick={() => setActiveTab('reviews')}
+                  className={`py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center ${activeTab === 'reviews' ? 'bg-emerald-500 text-black shadow-md' : 'text-gray-400 hover:text-white'}`}
+                >
+                  Reviews
+                </button>
+                <button 
+                  onClick={() => setActiveTab('account')}
+                  className={`py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center ${activeTab === 'account' ? 'bg-emerald-500 text-black shadow-md' : 'text-gray-400 hover:text-white'}`}
+                >
+                  Account
+                </button>
+              </div>
+
             </div>
-            <p className="text-xs text-gray-300">Muy amable y puntual en la entrega. Todo perfecto 👍</p>
           </div>
-        </div>
 
-      </div>
+          <main className="max-w-md mx-auto px-4 py-6 space-y-4">
+            {activeTab === 'account' ? (
+              <>
+                <div className="bg-[#1E1E1E] border border-gray-800 rounded-3xl p-3 shadow-xl space-y-1">
+                  
+                  <Link href="/profile/listings" className="flex items-center justify-between p-4 hover:bg-[#121212] rounded-2xl transition group">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-10 h-10 rounded-2xl bg-black/40 border border-gray-800 flex items-center justify-center text-sm">📋</div>
+                      <div>
+                        <h3 className="text-xs font-bold text-white group-hover:text-emerald-400 transition">My Listings</h3>
+                        <p className="text-[10px] text-gray-400">{myListingsCount} active</p>
+                      </div>
+                    </div>
+                    <span className="text-gray-600 group-hover:text-white">›</span>
+                  </Link>
 
-      {/* BARRA DE NAVEGACIÓN INFERIOR */}
-      <nav className="absolute bottom-0 left-0 right-0 bg-[#121212]/95 backdrop-blur-md border-t border-gray-900 py-3 px-6 flex justify-around items-center z-50">
-        <Link href="/" className="flex flex-col items-center text-gray-400 hover:text-white gap-1 transition">
+                  <Link href="/profile/saved" className="flex items-center justify-between p-4 hover:bg-[#121212] rounded-2xl transition group">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-10 h-10 rounded-2xl bg-black/40 border border-gray-800 flex items-center justify-center text-sm">❤️</div>
+                      <div>
+                        <h3 className="text-xs font-bold text-white group-hover:text-emerald-400 transition">Saved Items</h3>
+                        <p className="text-[10px] text-gray-400">{savedCount} items</p>
+                      </div>
+                    </div>
+                    <span className="text-gray-600 group-hover:text-white">›</span>
+                  </Link>
+
+                  <Link href="/profile/payment" className="flex items-center justify-between p-4 hover:bg-[#121212] rounded-2xl transition group">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-10 h-10 rounded-2xl bg-black/40 border border-gray-800 flex items-center justify-center text-sm">💳</div>
+                      <div>
+                        <h3 className="text-xs font-bold text-white group-hover:text-emerald-400 transition">Payment Methods</h3>
+                        <p className="text-[10px] text-gray-400">{cardsCount > 0 ? `${cardsCount} card(s) saved` : 'Visa ending 4567'}</p>
+                      </div>
+                    </div>
+                    <span className="text-gray-600 group-hover:text-white">›</span>
+                  </Link>
+
+                  {/* ENLACE A SETTINGS */}
+                  <Link href="/profile/settings" className="flex items-center justify-between p-4 hover:bg-[#121212] rounded-2xl transition group">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-10 h-10 rounded-2xl bg-black/40 border border-gray-800 flex items-center justify-center text-sm">⚙️</div>
+                      <div>
+                        <h3 className="text-xs font-bold text-white group-hover:text-emerald-400 transition">Settings</h3>
+                      </div>
+                    </div>
+                    <span className="text-gray-600 group-hover:text-white">›</span>
+                  </Link>
+
+                  {/* ENLACE A HELP & SUPPORT */}
+                  <Link href="/profile/support" className="flex items-center justify-between p-4 hover:bg-[#121212] rounded-2xl transition group">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-10 h-10 rounded-2xl bg-black/40 border border-gray-800 flex items-center justify-center text-sm">❓</div>
+                      <div>
+                        <h3 className="text-xs font-bold text-white group-hover:text-emerald-400 transition">Help & Support</h3>
+                      </div>
+                    </div>
+                    <span className="text-gray-600 group-hover:text-white">›</span>
+                  </Link>
+
+                </div>
+
+                <button 
+                  onClick={handleLogout}
+                  className="w-full bg-[#1E1E1E] hover:bg-red-500/10 text-red-500 border border-red-500/30 py-4 rounded-3xl font-extrabold text-xs transition cursor-pointer shadow-lg"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <div className="space-y-4">
+                <div className="bg-[#1E1E1E] border border-gray-800 rounded-3xl p-5 space-y-4 shadow-xl">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-3xl font-black text-white">4.8</span>
+                      <div className="text-emerald-400 text-xs mt-0.5">★★★★★</div>
+                      <span className="text-[10px] text-gray-400">23 reviews</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </main>
+        </>
+      )}
+
+      {/* 3. BARRA INFERIOR MÓVIL */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#121212]/95 backdrop-blur-md border-t border-gray-900 py-3 px-6 flex justify-around items-center z-50">
+        <Link href="/home" className="flex flex-col items-center text-gray-400 hover:text-white gap-1">
           <span className="text-lg">🏠</span>
           <span className="text-[10px] font-medium">Home</span>
         </Link>
-        <Link href="/" className="flex flex-col items-center text-gray-400 hover:text-white gap-1 transition">
+        <Link href="/home" className="flex flex-col items-center text-gray-400 hover:text-white gap-1">
           <span className="text-lg">🔍</span>
           <span className="text-[10px] font-medium">Browse</span>
         </Link>
-        
-        <Link href="/products/new" className="w-12 h-12 bg-emerald-500 hover:bg-emerald-400 text-black rounded-full flex items-center justify-center font-bold text-xl shadow-lg shadow-emerald-500/30 transition transform hover:scale-105">
+        <Link href="/products/new" className="w-12 h-12 bg-emerald-500 hover:bg-emerald-400 text-black rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
           +
         </Link>
-        
-        <Link href="/messages" className="flex flex-col items-center text-gray-400 hover:text-white gap-1 transition relative">
+        <Link href="/messages" className="flex flex-col items-center text-gray-400 hover:text-white gap-1 relative">
           <span className="text-lg">💬</span>
-          <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 text-black text-[9px] font-bold rounded-full flex items-center justify-center">2</span>
+          <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 text-black text-[9px] font-bold rounded-full flex items-center justify-center">3</span>
           <span className="text-[10px] font-medium">Messages</span>
         </Link>
-        
-        <Link href="/profile" className="flex flex-col items-center text-emerald-400 gap-1 transition">
+        <Link href="/profile" className="flex flex-col items-center text-emerald-400 gap-1">
           <span className="text-lg">👤</span>
-          <span className="text-[10px] font-medium">Profile</span>
+          <span className="text-[10px] font-medium text-emerald-400">Profile</span>
         </Link>
       </nav>
 

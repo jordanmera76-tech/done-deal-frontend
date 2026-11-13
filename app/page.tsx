@@ -1,127 +1,86 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { getProducts, Product } from '@/services/productService';
-import ProductCard from '@/components/ProductCard';
 import Link from 'next/link';
 
-export default function Home() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  // Cargamos los productos del backend al iniciar la página
-  useEffect(() => {
-    getProducts()
-      .then((data) => {
-        if (Array.isArray(data)) setProducts(data);
-      })
-      .catch((err) => console.error('Error al cargar productos:', err))
-      .finally(() => setLoading(false));
-  }, []);
-
-  // Filtramos los productos en tiempo real según lo que escribas en el buscador
-  const filteredProducts = products.filter((product) =>
-    product.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
+export default function WelcomePage() {
   return (
-    <div className="min-h-screen bg-[#121212] text-white pb-28">
+    <div className="min-h-screen bg-[#121212] text-white flex flex-col font-sans">
       
-      {/* 1. Header con ubicación y perfil */}
-      <header className="px-6 pt-4 pb-3 flex justify-between items-center border-b border-gray-900">
-        <div className="flex items-center gap-2">
-          <span className="text-xs">📍</span>
-          <span className="text-xs font-medium text-gray-300">Cali, Colombia</span>
-        </div>
-        <div className="w-8 h-8 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center overflow-hidden">
-          <span className="text-xs font-bold text-emerald-400">JM</span>
+      {/* NAVBAR DE ESCRITORIO */}
+      <header className="hidden md:flex sticky top-0 z-50 bg-[#121212]/95 backdrop-blur-md border-b border-gray-800 px-8 py-4 items-center justify-between">
+        <Link href="/home" className="text-xl font-extrabold text-emerald-400 tracking-wider">
+          DONE DEAL
+        </Link>
+        <div className="flex items-center gap-6 text-sm font-medium">
+          <Link href="/home" className="text-gray-300 hover:text-white transition">Home</Link>
+          <Link href="/auth/signin" className="text-gray-300 hover:text-white transition">Sign In</Link>
+          <Link href="/auth/signup" className="bg-emerald-500 hover:bg-emerald-400 text-black px-4 py-2 rounded-xl font-bold text-xs shadow-lg">
+            Create Account
+          </Link>
         </div>
       </header>
 
-      {/* 2. Barra de búsqueda interactiva */}
-      <div className="px-6 my-4">
-        <div className="relative">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">🔍</span>
-          <input 
-            type="text"
-            placeholder="Search for anything..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#1E1E1E] text-sm text-gray-200 pl-11 pr-4 py-3.5 rounded-2xl border border-gray-800 focus:outline-none focus:border-emerald-500 transition shadow-inner"
-          />
-        </div>
-      </div>
-
-      {/* 3. Banner Destacado */}
-      <div className="px-6 mb-6">
-        <div className="bg-[#1E1E1E] border border-gray-800 rounded-2xl p-5 relative overflow-hidden shadow-lg">
-          <span className="bg-emerald-500/10 text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Featured</span>
-          <h2 className="text-xl font-bold text-white mt-2">MacBook Pro M2</h2>
-          <p className="text-emerald-400 font-bold text-lg mt-0.5">€1,200</p>
-          <p className="text-xs text-gray-400 mt-1">Galway • Like New</p>
-        </div>
-      </div>
-
-      {/* 4. Categorías */}
-      <div className="px-6 mb-6 flex gap-3 overflow-x-auto pb-2 scrollbar-none">
-        <span className="bg-emerald-500 text-black font-bold text-xs px-4 py-2 rounded-full cursor-pointer">✨ All</span>
-        <span className="bg-[#1E1E1E] border border-gray-800 text-gray-300 font-medium text-xs px-4 py-2 rounded-full cursor-pointer hover:border-emerald-500 transition">💻 Electronics</span>
-        <span className="bg-[#1E1E1E] border border-gray-800 text-gray-300 font-medium text-xs px-4 py-2 rounded-full cursor-pointer hover:border-emerald-500 transition">🚗 Vehicles</span>
-        <span className="bg-[#1E1E1E] border border-gray-800 text-gray-300 font-medium text-xs px-4 py-2 rounded-full cursor-pointer hover:border-emerald-500 transition">👕 Fashion</span>
-      </div>
-
-      {/* 5. Cuadrícula de Productos */}
-      <div className="px-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold text-white">Recent Listings ({filteredProducts.length})</h2>
-          <span className="text-xs text-emerald-400 font-medium cursor-pointer hover:underline">See all</span>
+      {/* CONTENIDO PRINCIPAL ADAPTABLE */}
+      <div className="flex-1 flex flex-col justify-between p-6 max-w-md mx-auto w-full my-auto">
+        
+        {/* Indicador superior (solo móvil) */}
+        <div className="flex justify-center pt-2 md:hidden">
+          <div className="w-12 h-1 bg-emerald-500 rounded-full" />
         </div>
 
-        {loading ? (
-          <p className="text-emerald-400 text-sm text-center py-10">Cargando productos...</p>
-        ) : filteredProducts.length === 0 ? (
-          <p className="text-gray-400 text-sm text-center py-10">No se encontraron productos.</p>
-        ) : (
-          <div className="grid grid-cols-2 gap-4">
-            {filteredProducts.map((product) => (
-              <ProductCard
-                key={product._id}
-                id={product._id}
-                title={product.title}
-                price={product.price}
-                category={product.category}
-              />
-            ))}
+        {/* Contenido Central */}
+        <div className="flex flex-col items-center text-center my-auto space-y-6 py-6">
+          
+          <div className="w-20 h-20 bg-[#1E1E1E] border border-gray-800 rounded-3xl flex items-center justify-center shadow-2xl relative">
+            <div className="absolute inset-0 bg-emerald-500/10 rounded-3xl blur-xl" />
+            <span className="text-3xl font-black text-emerald-400 relative z-10">D</span>
           </div>
-        )}
-      </div>
 
-      {/* 6. Barra de navegación inferior fija */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-[#121212]/95 backdrop-blur-md border-t border-gray-900 py-3 px-6 flex justify-around items-center z-50 max-w-md mx-auto">
-        <Link href="/" className="flex flex-col items-center text-emerald-400 gap-1">
-          <span className="text-lg">🏠</span>
-          <span className="text-[10px] font-medium">Home</span>
-        </Link>
-        <Link href="/" className="flex flex-col items-center text-gray-400 hover:text-white gap-1 transition">
-          <span className="text-lg">🔍</span>
-          <span className="text-[10px] font-medium">Browse</span>
-        </Link>
-        
-        <Link href="/products/new" className="w-12 h-12 bg-emerald-500 hover:bg-emerald-400 text-black rounded-full flex items-center justify-center font-bold text-xl shadow-lg shadow-emerald-500/30 transition transform hover:scale-105">
-          +
-        </Link>
-        
-        <Link href="/messages" className="flex flex-col items-center text-gray-400 hover:text-white gap-1 transition relative">
-          <span className="text-lg">💬</span>
-          <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 text-black text-[9px] font-bold rounded-full flex items-center justify-center">2</span>
-          <span className="text-[10px] font-medium">Messages</span>
-        </Link>
-        <Link href="/profile" className="flex flex-col items-center text-gray-400 hover:text-white gap-1 transition">
-          <span className="text-lg">👤</span>
-          <span className="text-[10px] font-medium">Profile</span>
-        </Link>
-      </nav>
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-white mb-2">DoneDeal</h1>
+            <p className="text-xs text-gray-400 max-w-xs leading-relaxed">
+              Ireland's favourite marketplace. Buy and sell locally with ease.
+            </p>
+          </div>
+
+          <div className="w-full bg-[#1E1E1E]/80 border border-gray-800 rounded-3xl p-5 space-y-4 text-left shadow-lg">
+            <div className="flex items-center gap-3.5">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xs">🔍</div>
+              <span className="text-xs text-gray-300 font-medium">Browse thousands of local listings</span>
+            </div>
+            <div className="flex items-center gap-3.5">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xs">💬</div>
+              <span className="text-xs text-gray-300 font-medium">Chat directly with sellers</span>
+            </div>
+            <div className="flex items-center gap-3.5">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xs">⭐</div>
+              <span className="text-xs text-gray-300 font-medium">Verified sellers and safe transactions</span>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Botones Inferiores */}
+        <div className="space-y-3 pb-6">
+          <Link 
+            href="/home" 
+            className="w-full bg-emerald-500 hover:bg-emerald-400 text-black py-4 rounded-2xl font-extrabold text-xs flex items-center justify-center transition shadow-lg shadow-emerald-500/20"
+          >
+            Start Exploring
+          </Link>
+          <Link 
+            href="/auth/signup" 
+            className="w-full bg-[#1E1E1E] hover:bg-gray-800 border border-gray-800 text-white py-4 rounded-2xl font-bold text-xs flex items-center justify-center transition shadow-md"
+          >
+            Create Account
+          </Link>
+          <div className="text-center pt-2">
+            <span className="text-xs text-gray-400">Already have an account? </span>
+            <Link href="/auth/signin" className="text-xs font-bold text-emerald-400 hover:underline">Sign in</Link>
+          </div>
+        </div>
+
+      </div>
 
     </div>
   );
