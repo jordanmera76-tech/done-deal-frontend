@@ -50,25 +50,31 @@ export default function NewProductPage() {
     };
 
     // 1. Guardado inmediato en localStorage para visualización instantánea garantizada
-    const existingLocal = JSON.parse(localStorage.getItem('local_products') || '[]');
-    localStorage.setItem('local_products', JSON.stringify([newProduct, ...existingLocal]));
+    /*const existingLocal = JSON.parse(localStorage.getItem('local_products') || '[]');
+    localStorage.setItem('local_products', JSON.stringify([newProduct, ...existingLocal])); */
 
     // 2. Intento de envío al backend de NestJS
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/products`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(newProduct),
       });
-    } catch (err) {
-      console.log('Backend offline, usando almacenamiento local.');
-    }
 
-    setLoading(false);
-    alert('¡Producto publicado con éxito!');
-    router.push('/home');
+      if (!response.ok) {
+        throw new Error('Error al guardar en el servidor');
+      }
+
+      alert('¡Producto publicado con éxito en la nube!');
+      router.push('/home');
+    } catch (err) {
+      console.error(err);
+      alert('Hubo un error al conectar con el backend en la nube.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
